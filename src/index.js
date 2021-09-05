@@ -2,18 +2,13 @@ import './sass/main.scss';
 import fetchCountries from './js/fetchCountries';
 import countriesListTpl from './templates/countriesList.hbs';
 import countryInfoTpl from './templates/countryInfo.hbs';
-import { alert, defaults } from '@pnotify/core';
+import { alert, defaults, error } from '@pnotify/core';
 const _ = require('lodash');
 
 const refs={
     input: document.querySelector('.input'),
     countriesMarkUp: document.querySelector('.countries-result'),
 };
-
-
-defaults.labels = {close: 'Close'};
-defaults.minHeight= '10px'
-
 
 refs.input.addEventListener('input',_.debounce(onSearch,500))
 
@@ -44,7 +39,7 @@ function renderCountriesList(countries){
 
 function manyCountriesError (){
         refs.countriesMarkUp.innerHTML='';
-        myAlert("Too many matches found. Please enter a more specific query!");
+        myAlert('Too many matches found. Please enter a more specific query!');
 };
 
 
