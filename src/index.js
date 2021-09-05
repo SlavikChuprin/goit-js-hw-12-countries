@@ -2,29 +2,34 @@ import './sass/main.scss';
 import fetchCountries from './js/fetchCountries';
 import countriesListTpl from './templates/countriesList.hbs';
 import countryInfoTpl from './templates/countryInfo.hbs';
-// import { alert, notice, info, success, error } from '@pnotify/core';
+import { alert, defaults } from '@pnotify/core';
 const _ = require('lodash');
 
-
-
-const BASE_URL = 'https://restcountries.eu/rest/v2/';
 const refs={
     input: document.querySelector('.input'),
     countriesMarkUp: document.querySelector('.countries-result'),
 };
 
+
+defaults.labels = {close: 'Close'};
+defaults.minHeight= '10px'
+
+
 refs.input.addEventListener('input',_.debounce(onSearch,500))
 
 function onSearch(e) {
-  
-     const searchQuery= e.target.value;
-     console.log(searchQuery);
-
-    fetch(`${BASE_URL}name/${searchQuery}`)
-    .then(res=>res.json())
+    const searchQuery= e.target.value;
+    fetchCountries(searchQuery)
+    .then((countries)=> {
+        if(countries.length>10){
+        } else {
+            return countries;
+        }  
+    })
     .then(renderCountriesList)
-    .catch(error=>alert('error'));
-    
+    .catch((error)=>manyCountriesError())        
+    .finally(()=> {
+            refs.input.value="";})    
 };
 
 function renderCountriesList(countries){
@@ -32,16 +37,20 @@ function renderCountriesList(countries){
  const list= countryInfoTpl(...countries);
  refs.countriesMarkUp.innerHTML =list;
     } else{
-        console.log("больше 1",countries.length );
      const list= countriesListTpl(countries);
      refs.countriesMarkUp.innerHTML =list;
  };
+};
 
- refs.input.value="";
+function manyCountriesError (){
+        refs.countriesMarkUp.innerHTML='';
+        myAlert("Too many matches found. Please enter a more specific query!");
 };
 
 
-function moreCountries (error){
-    console.log(error); 
-    alert('error');
-};
+function myAlert(text) {
+alert({
+  text ,
+  type: 'info',
+});}
+
