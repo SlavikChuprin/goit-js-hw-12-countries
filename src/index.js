@@ -2,13 +2,15 @@ import './sass/main.scss';
 import fetchCountries from './js/fetchCountries';
 import countriesListTpl from './templates/countriesList.hbs';
 import countryInfoTpl from './templates/countryInfo.hbs';
-import { alert, defaults, error } from '@pnotify/core';
+import { alert, defaults } from '@pnotify/core';
 const _ = require('lodash');
-
+const textErrorManyCountries = 'Too many matches found. Please enter a more specific query!';
+const textErrorNoFound = 'Сheck the correctness of entered query';
 const refs={
     input: document.querySelector('.input'),
     countriesMarkUp: document.querySelector('.countries-result'),
 };
+
 
 refs.input.addEventListener('input',_.debounce(onSearch,500))
 
@@ -16,36 +18,38 @@ function onSearch(e) {
     const searchQuery= e.target.value;
     fetchCountries(searchQuery)
     .then((countries)=> {
-        if(countries.length>10){
-        } else {
-            return countries;
+        console.log(countries);
+        if (countries.status === 404){
+            myAlert(textErrorNoFound, 'error');
+            return;
+        }
+        if(countries.length < 10){
+          renderCountriesList(countries);
+        }  else  {
+           myAlert(textErrorManyCountries,'notice'); 
         }  
     })
-    .then(renderCountriesList)
-    .catch((error)=>manyCountriesError())        
-    .finally(()=> {
-            refs.input.value="";})    
+    .catch((error)=> console.log("это лог ошибки", error));     
 };
 
 function renderCountriesList(countries){
     if(countries.length ===1){
  const list= countryInfoTpl(...countries);
  refs.countriesMarkUp.innerHTML =list;
-    } else{
+    } else {
      const list= countriesListTpl(countries);
      refs.countriesMarkUp.innerHTML =list;
  };
 };
 
-function manyCountriesError (){
-        refs.countriesMarkUp.innerHTML='';
-        myAlert('Too many matches found. Please enter a more specific query!');
-};
-
-
-function myAlert(text) {
+function myAlert(text, type) {
+     refs.countriesMarkUp.innerHTML='';
 alert({
-  text ,
-  type: 'info',
-});}
+  text,
+  type,
+});};
+defaults.mode = 'light';
+defaults.hide= true;
+defaults.delay= 3000;
+
 
